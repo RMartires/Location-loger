@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:padding="20dp"
+    android:id="@+id/relativelayout"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="longitude"
+        android:textSize="25dp"
+        android:id="@+id/longitude"
+        />
+
+    <TextView
+        android:id="@+id/longitudetext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/longitude"
+        android:layout_alignStart="@+id/longitude"
+        android:layout_below="@+id/longitude"
+        android:layout_marginLeft="18dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="15dp"
+        android:text="longitude"
+        android:textSize="15dp"
+        android:textStyle="bold" />
+
+
+    <TextView
+        android:id="@+id/latitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/longitude"
+        android:layout_alignBottom="@+id/longitude"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:text="latitude"
+        android:textSize="25dp" />
+
+    <TextView
+        android:id="@+id/latitudetext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/longitudetext"
+        android:layout_alignBottom="@+id/longitudetext"
+        android:layout_alignEnd="@+id/latitude"
+        android:layout_alignRight="@+id/latitude"
+        android:layout_marginEnd="13dp"
+        android:layout_marginRight="13dp"
+        android:text="latitude"
+        android:textSize="15dp"
+        android:textStyle="bold" />
+
+
+</RelativeLayout>
