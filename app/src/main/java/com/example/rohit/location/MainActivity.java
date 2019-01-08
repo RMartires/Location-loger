@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000, 1,new myLocationListener());
 
+
+
         intRecyclerview();
 
         button.setOnClickListener(new View.OnClickListener() {
@@ -74,6 +76,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+       boolean s = getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_RTT);
+
+        Log.d("wifirtt", "onCreate: "+s);
 
     }
 
