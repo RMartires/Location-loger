@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -22,6 +23,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+
 import java.security.Permission;
 import java.util.ArrayList;
 
@@ -31,9 +46,13 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> longitude = new ArrayList<>();
     private LocationManager locationManager;
     private Button button;
-    private Location location1;
+    private LocationRequest locationRequest;
+    private FusedLocationProviderClient mfusedlocationprovierclient;
+    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+    private LocationCallback locationCallback;
     RecyclerView recyclerView;
     RecycleViewAdapter adapter;
+
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -42,46 +61,50 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         button = findViewById(R.id.addLocationButton);
         recyclerView = findViewById(R.id.recyclerview);
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        //location part
+        mfusedlocationprovierclient = LocationServices.getFusedLocationProviderClient(this);
+        createLocationrequest();
 
-        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.INTERNET
-            },10);
+        locationCallback = new LocationCallback(){
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if(locationResult == null){
+                    Log.d("location", "onLocationResult: nothing");
+                    return;
+                }
+                else
+                    for (Location l:locationResult.getLocations()){
+                        Log.d("location", "onLocationResult:"+l.toString());
+                    }
 
-            return;
-        }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000, 1,new myLocationListener());
-
+            }
+        };
 
 
         intRecyclerview();
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if(location1==null) {
-                    Log.v("GPS-ERROR", "location not found");
-                    Toast.makeText(getApplicationContext(),"GPS-ERROR",Toast.LENGTH_SHORT).show();
-                }else {
-                 longitude.add(String.valueOf(location1.getLongitude()));
-                 latitude.add(String.valueOf(location1.getLatitude()));
-                 adapter.notifyDataSetChanged();
-                }
-            }
-        });
-
-       boolean s = getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_RTT);
-
-        Log.d("wifirtt", "onCreate: "+s);
 
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[] {
+                    Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.INTERNET,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            },10);
+            return;
+        }
+        mfusedlocationprovierclient.requestLocationUpdates(locationRequest,locationCallback,null);
+        Log.d("letssee", "onResume: ");
+    }
+
 
 
     private void intRecyclerview() {
@@ -91,30 +114,11 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
-
-    class myLocationListener implements LocationListener{
-
-
-        @Override
-        public void onLocationChanged(Location location) {
-            location1=location;
-        }
-
-        @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String s) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String s) {
-
-        }
+    private void createLocationrequest(){
+        locationRequest = LocationRequest.create();
+        locationRequest.setInterval(5000);
+       // locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
-
 
 }
