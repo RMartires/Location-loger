@@ -44,25 +44,59 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<String> latitude = new ArrayList<>();
     private ArrayList<String> longitude = new ArrayList<>();
-    private LocationManager locationManager;
     private Button button;
     private LocationRequest locationRequest;
     private FusedLocationProviderClient mfusedlocationprovierclient;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
     private LocationCallback locationCallback;
+    private Location location;
     RecyclerView recyclerView;
     RecycleViewAdapter adapter;
 
 
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         button = findViewById(R.id.addLocationButton);
         recyclerView = findViewById(R.id.recyclerview);
+
+        intializelocaton();
+        intRecyclerview();
+
+        //addlocation-button
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[] {
+                            Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.INTERNET,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    },10);
+                    return;
+                }
+                mfusedlocationprovierclient.requestLocationUpdates(locationRequest,locationCallback,null);
+                Log.d("req-location updates", "Success");
+
+            }
+        });
+
+
+    }
+
+
+    private void intRecyclerview() {
+
+        adapter = new RecycleViewAdapter(latitude, longitude, this);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+
+    private void intializelocaton(){
 
         //location part
         mfusedlocationprovierclient = LocationServices.getFusedLocationProviderClient(this);
@@ -75,43 +109,19 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("location", "onLocationResult: nothing");
                     return;
                 }
-                else
-                    for (Location l:locationResult.getLocations()){
-                        Log.d("location", "onLocationResult:"+l.toString());
-                    }
+                else {
+                    location=locationResult.getLocations().get(0);
+                    longitude.add(String.valueOf(location.getLongitude()));
+                    latitude.add(String.valueOf(location.getLatitude()));
+                    adapter.notifyDataSetChanged();
+
+                    mfusedlocationprovierclient.removeLocationUpdates(locationCallback);
+                    Log.d("remove loc updates", "Success");
+                }
 
             }
         };
 
-
-        intRecyclerview();
-
-
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[] {
-                    Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.INTERNET,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-            },10);
-            return;
-        }
-        mfusedlocationprovierclient.requestLocationUpdates(locationRequest,locationCallback,null);
-        Log.d("letssee", "onResume: ");
-    }
-
-
-
-    private void intRecyclerview() {
-
-        adapter = new RecycleViewAdapter(latitude, longitude, this);
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private void createLocationrequest(){
@@ -120,5 +130,7 @@ public class MainActivity extends AppCompatActivity {
        // locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
+
+
 
 }
