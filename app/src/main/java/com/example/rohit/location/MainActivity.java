@@ -194,6 +194,7 @@ public class MainActivity extends AppCompatActivity {
             super(TAG);
             start();
             mhandler = new Handler(getLooper());
+            
         }
 
         public Worker execute(){
