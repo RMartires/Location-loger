@@ -22,6 +22,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+
 import java.util.ArrayList;
 
 
@@ -50,10 +51,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        requestPermissions(new String[] {
-                Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.INTERNET,
+        requestPermissions(new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.INTERNET,
                 Manifest.permission.ACCESS_COARSE_LOCATION
-        },10);
+        }, 10);
 
 
         button = findViewById(R.id.addLocationButton);
@@ -69,29 +70,29 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(recivedlocation==true) {
+                if (recivedlocation == true) {
                     mythread.getMhandler().sendEmptyMessage(0);
-                }else {
-                    Toast.makeText(getApplicationContext(),"Loading Previous Location",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Loading Previous Location", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
         //end button
 
-       uihandler= new Handler(Looper.getMainLooper()){
-           @Override
-           public void handleMessage(Message msg) {
-               super.handleMessage(msg);
-               Log.d("uithread", "handleMessage: ");
-               adapter.notifyDataSetChanged();
-           }
-       };
+        uihandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                Log.d("uithread", "handleMessage: ");
+                adapter.notifyDataSetChanged();
+            }
+        };
 
 
     }
 
-    public Handler getuihandler(){
+    public Handler getuihandler() {
         return uihandler;
     }
 
@@ -103,37 +104,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void intializelocaton(){
+    private void intializelocaton() {
 
         //location part
         mfusedlocationprovierclient = LocationServices.getFusedLocationProviderClient(this);
         createLocationrequest();
-        Log.d(TAGt, "intializelocaton:"+Looper.myLooper().getThread());
+        Log.d(TAGt, "intializelocaton:" + Looper.myLooper().getThread());
 
-        locationCallback = new LocationCallback(){
+        locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
-                if(locationResult == null){
+                if (locationResult == null) {
                     Log.d("location", "onLocationResult: nothing");
                     return;
-                }
-                else {
-                    //remove the loading
-                    longitude.remove(longitude.size()-1);
-                    latitude.remove(latitude.size()-1);
-                    //end remove
+                } else {
+                        //remove the loading
+                        longitude.remove(longitude.size() - 1);
+                        latitude.remove(latitude.size() - 1);
+                        //end remove
 
-                    location=locationResult.getLocations().get(0);
-                    longitude.add(String.valueOf(location.getLongitude()));
-                    latitude.add(String.valueOf(location.getLatitude()));
+                        location = locationResult.getLocations().get(0);
+                        longitude.add(String.valueOf(location.getLongitude()));
+                        latitude.add(String.valueOf(location.getLatitude()));
 
-                    mfusedlocationprovierclient.removeLocationUpdates(locationCallback);
-                    Log.d("remove loc updates", "Success");
+                        mfusedlocationprovierclient.removeLocationUpdates(locationCallback);
+                        Log.d("remove loc updates", "Success");
 
-                    getuihandler().sendEmptyMessage(0);
+                        getuihandler().sendEmptyMessage(0);
 
-                    SystemClock.sleep(1000);
-                    recivedlocation=true;
+                        recivedlocation = true;
 
                 }
 
